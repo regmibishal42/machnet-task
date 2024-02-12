@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
 )
 
 const (
@@ -20,6 +21,8 @@ func CreateConnection() *sql.DB {
 		panic(err)
 	}
 	fmt.Println("Database Connection Successful")
+	//defer db.Close()
+	MigrateTables(db)
 	return db
 }
 
@@ -36,7 +39,7 @@ func generateConnectionString() string {
 	if host == "" {
 		host = DEFAULT_HOST
 	}
-	return fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s", host, user, password, db, port)
+	return fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable", host, user, password, db, port)
 }
 
 func DbExceptionHandle(err error) {
