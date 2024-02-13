@@ -1,11 +1,10 @@
-import Sidebar from '../components/Sidebar'
+
 
 const Transactions = () => {
-  return (
-    <>
-        <Sidebar />
+
+    return <>
+    Transactions
     </>
-  )
 }
 
 export default Transactions

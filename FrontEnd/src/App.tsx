@@ -2,6 +2,7 @@ import './App.css'
 import {BrowserRouter,Routes,Route} from "react-router-dom";
 import NotFoundPage from './components/NotFound';
 import Transactions from './pages/Transactions';
+import Layout from './pages/Layout';
 
 
 function App() {
@@ -10,8 +11,12 @@ function App() {
     <>
       <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Transactions />} />
+        <Route element={<Layout/>}>
+          <Route path="/" element={<Transactions/>} />
+          <Route path="/home" element={<Transactions/>} />
+          <Route path="/transactions" element={<Transactions/>} />
         <Route path="*" element={<NotFoundPage />} />
+        </Route>
       </Routes>
       </BrowserRouter>
     </>
