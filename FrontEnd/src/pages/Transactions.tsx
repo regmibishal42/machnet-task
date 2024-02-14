@@ -1,40 +1,28 @@
 import { Button, Box } from "@mui/material";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Model from "../components/Model";
 import { DataGrid } from '@mui/x-data-grid';
 import { DateFormatter } from "../utils/DateFormatter";
 import DataGridCustomToolbar from "../components/DataGridCustomBar";
 
-const mockData = [
-    {
-        "transactionID": "cc120b2b-edde-46e8-b3f8-872ad1ce20db",
-        "createdAt": "2024-02-12T15:42:56.700583Z",
-        "amount": 5000,
-        "status": "Pending",
-        "account": "Bishal Regmi",
-        "paymentMethod": "esewa"
-    },
-    {
-        "transactionID": "cc120b2b-edde-46e8-b3f8-872ad1ce20db",
-        "createdAt": "2024-02-12T15:42:56.700583Z",
-        "amount": 5000,
-        "status": "Pending",
-        "account": "Bishal Regmi",
-        "paymentMethod": "esewa"
-    },
-    {
-        "transactionID": "cc120b2b-edde-46e8-b3f8-872ad1ce20db",
-        "createdAt": "2024-02-12T15:42:56.700583Z",
-        "amount": 5000,
-        "status": "Pending",
-        "account": "Bishal Regmi",
-        "paymentMethod": "esewa"
-    },
-]
+interface Transaction {
+    transaction_id: string;
+    created_at: string;
+    amount: number;
+    bank_description: string;
+    from_account: string;
+    payment_method: string;
+    status: string;
+    to_account: string;
+}
 
-const Transactions:React.FC = () => {
+const Transactions: React.FC = () => {
     const [open, setOpen] = useState(false);
     const [page, setPage] = useState(1);
+    const [rows, setRows] = useState<Transaction[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [modelData,setModelData] = useState<Transaction>()
+
     const handleOpen = () => {
         setOpen(true);
     };
@@ -42,24 +30,46 @@ const Transactions:React.FC = () => {
     const handleClose = () => {
         setOpen(false);
     };
-    const handleRowClick = (params,event) =>{
-        console.log(params.row)
+
+    const fetchData = async () => {
+        setLoading(true);
+        try {
+            const response = await fetch(`http://localhost:8080/api/transactions?page=${page}`);
+            const data = await response.json();
+            console.log("Data from server",data)
+            setRows(data);
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchData();
+    }, [page]);
+
+    const handleRowClick = (params: any, event: React.MouseEvent) => {
+        setModelData(()=>params.row)
+        setOpen(true)
     }
 
-    // Columns for the data grid
+    const handlePageChange = (params: any) => {
+        setPage(params.page);
+    }
+
     const columns = [
         {
-            field: "createdAt",
+            field: "created_at",
             headerName: "Date(EDT)",
             flex: 1,
             valueGetter: (params: any) => {
-                const formattedDate = DateFormatter(params.row.createdAt)
-                return formattedDate
-
+                const formattedDate = DateFormatter(params.row.created_at);
+                return formattedDate;
             }
         },
         {
-            field: "account",
+            field: "to_account",
             headerName: "To/From",
             flex: 1,
         },
@@ -68,27 +78,19 @@ const Transactions:React.FC = () => {
             headerName: "Amount",
             flex: 1,
         },
-        // {
-        //     field: "account",
-        //     headerName: "Account",
-        //     flex: 1,
-        // },
         {
-            field: "paymentMethod",
+            field: "payment_method",
             headerName: "Payment Method",
             flex: 1,
         },
-    ]
+    ];
 
     return (
         <>
             <Button onClick={handleOpen}>Open Model</Button>
-            <Model open={open} handleClose={handleClose} />
+            <Model open={open} handleClose={handleClose} data={modelData}/>
             <Box>
-
-                {/* <Header title="Products" subtitle="See your products here" /> */}
-                <Box height="80vh"
-                    sx={{
+                <Box height="80vh" sx={{
                         "& .MuiDataGrid-root": {
                             border: "none",
                         },
@@ -112,24 +114,20 @@ const Transactions:React.FC = () => {
                             color: `${"#ffedc2"} !important`,
                         },
                     }}>
-
                     <DataGrid
-                        loading={false}
-                        getRowId={(row) => row.transactionID}
-                        rows={mockData || []}
+                        loading={loading}
+                        getRowId={(row) => row.transaction_id}
+                        rows={rows && rows}
                         columns={columns}
-                        rowCount={0}
-                        pagination
-                        page={page}
-                        pageSize={25}
-                        paginationMode='server'
-                        sortingMode='server'
                         onRowClick={handleRowClick}
-                        onPageChange={(newPage: any) => setPage(newPage)}
+                        pagination
+                        paginationMode='server'
+                        pageSize={25}
+                        rowCount={25}
+                        onPageChange={(newPage: number) => setPage(newPage)}
                         components={{ Toolbar: DataGridCustomToolbar }}
-
-                    // onPageSizeChnage
                     />
+
                 </Box>
             </Box>
         </>
