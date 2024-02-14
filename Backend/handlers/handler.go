@@ -42,15 +42,16 @@ func CreateNewTransaction(w http.ResponseWriter, r *http.Request) {
 	transaction.TransactionID = uuid.New().String()
 
 	// Prepare the SQL statement for inserting a new transaction
-	stmt, err := conn.Prepare("INSERT INTO transactions (transaction_id, created_at, amount, status, account, payment_method) VALUES ($1, $2, $3, $4, $5, $6) RETURNING transaction_id, created_at, amount, status, account, payment_method")
+	stmt, err := conn.Prepare("INSERT INTO transactions (transaction_id, created_at, amount, status, to_account,from_account, payment_method,bank_description) VALUES ($1, $2, $3, $4, $5, $6,$7,$8) RETURNING transaction_id, created_at, amount, status, to_account,from_account, payment_method,bank_description")
 	if err != nil {
+		fmt.Println("Error is", err.Error())
 		http.Error(w, "Unable to prepare SQL statement", http.StatusInternalServerError)
 		return
 	}
 	defer stmt.Close()
 	fmt.Println(stmt)
 	// Execute the SQL statement to insert the new transaction and return the inserted row
-	err = stmt.QueryRow(transaction.TransactionID, time.Now(), transaction.Amount, transaction.Status, transaction.Account, transaction.PaymentMethod).Scan(&transaction.TransactionID, &transaction.CreatedAt, &transaction.Amount, &transaction.Status, &transaction.Account, &transaction.PaymentMethod)
+	err = stmt.QueryRow(transaction.TransactionID, time.Now(), transaction.Amount, transaction.Status, transaction.ToAccount, transaction.FromAccount, transaction.PaymentMethod, transaction.BankDescription).Scan(&transaction.TransactionID, &transaction.CreatedAt, &transaction.Amount, &transaction.Status, &transaction.ToAccount, &transaction.FromAccount, &transaction.PaymentMethod, &transaction.BankDescription)
 	if err != nil {
 		http.Error(w, "Failed to insert transaction into the database", http.StatusInternalServerError)
 		return
@@ -96,7 +97,7 @@ func GetAllTransactions(w http.ResponseWriter, r *http.Request) {
 	var transactions []models.Transaction
 	for rows.Next() {
 		var transaction models.Transaction
-		err := rows.Scan(&transaction.TransactionID, &transaction.CreatedAt, &transaction.Amount, &transaction.Status, &transaction.Account, &transaction.PaymentMethod)
+		err := rows.Scan(&transaction.TransactionID, &transaction.CreatedAt, &transaction.Amount, &transaction.Status, &transaction.ToAccount, &transaction.FromAccount, &transaction.PaymentMethod, &transaction.BankDescription)
 		if err != nil {
 			http.Error(w, "Failed to scan row", http.StatusInternalServerError)
 			log.Fatal(err.Error())

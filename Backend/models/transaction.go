@@ -7,18 +7,22 @@ import (
 )
 
 type Transaction struct {
-	TransactionID string     `json:"transactionID"`
-	CreatedAt     *time.Time `json:"CreatedAt"`
-	Amount        float64    `json:"amount"`
-	Status        string     `json:"status"`
-	Account       string     `json:"account"`
-	PaymentMethod string     `json:"paymentMethod"`
+	TransactionID   string     `json:"transaction_id"`
+	CreatedAt       *time.Time `json:"created_at"`
+	Amount          float64    `json:"amount"`
+	Status          string     `json:"status"`
+	FromAccount     string     `json:"from_account"`
+	ToAccount       string     `json:"to_account"`
+	PaymentMethod   string     `json:"payment_method"`
+	BankDescription string     `json:"bank_description"`
 }
 type TransactionInput struct {
-	Amount        *float64 `json:"amount"`
-	Status        *string  `json:"status"`
-	Account       *string  `json:"account"`
-	PaymentMethod *string  `json:"paymentMethod"`
+	Amount          *float64 `json:"amount"`
+	Status          *string  `json:"status"`
+	FromAccount     *string  `json:"from_account"`
+	ToAccount       *string  `json:"to_account"`
+	PaymentMethod   *string  `json:"payment_method"`
+	BankDescription *string  `json:"bank_description"`
 }
 
 func (input *TransactionInput) Validation() (*Transaction, error) {
@@ -38,10 +42,20 @@ func (input *TransactionInput) Validation() (*Transaction, error) {
 		}
 		transaction.Status = *input.Status
 	}
-	if input.Account == nil {
-		return nil, errors.New("account is required")
+	if input.FromAccount == nil {
+		return nil, errors.New("from_account is required")
 	} else {
-		transaction.Account = *input.Account
+		transaction.FromAccount = *input.FromAccount
+	}
+	if input.ToAccount == nil {
+		return nil, errors.New("to_account is required")
+	} else {
+		transaction.ToAccount = *input.ToAccount
+	}
+	if input.BankDescription == nil {
+		return nil, errors.New("bank_description is required")
+	} else {
+		transaction.BankDescription = *input.BankDescription
 	}
 	if input.PaymentMethod == nil {
 		return nil, errors.New("paymentMethod is required")

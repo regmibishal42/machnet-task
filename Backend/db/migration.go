@@ -4,14 +4,17 @@ import "database/sql"
 
 func MigrateTables(db *sql.DB) error {
 	statements := []string{
-		`CREATE TABLE IF NOT EXISTS transactions (
+		`CREATE TABLE transactions (
 			transaction_id VARCHAR(255) PRIMARY KEY,
-			created_at TIMESTAMP,
+			created_at TIMESTAMPTZ,
 			amount NUMERIC,
 			status VARCHAR(255),
-			account VARCHAR(255),
-			payment_method VARCHAR(255)
+			from_account VARCHAR(255),
+			to_account VARCHAR(255),
+			payment_method VARCHAR(255),
+			bank_description TEXT
 		);
+		
 		`,
 	}
 	for _, stmt := range statements {
