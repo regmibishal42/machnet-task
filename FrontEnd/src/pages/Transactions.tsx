@@ -37,7 +37,10 @@ const Transactions: React.FC = () => {
             const response = await fetch(`http://localhost:8080/api/transactions?page=${page}`);
             const data = await response.json();
             console.log("Data from server",data)
-            setRows(data);
+            if (data){
+
+                setRows(data);
+            }
         } catch (error) {
             console.error('Error fetching data:', error);
         } finally {
